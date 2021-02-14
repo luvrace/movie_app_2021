@@ -1,26 +1,36 @@
 import React from "react";
-import PropTypes from "prop-types";
+import axios from "axios";
+import Movie from "./Movie";
 
-// state 
-class App extends React.Component{
- state = {
-  count:0
- };
- add = () => {
-    this.setState(current => ({count:current.count+1}));
-};
-minus = () => {
-    this.setState(current => ({count:current.count-1}));
-};
- render(){
-      return (
-        <div>
-          <h1>The number is : {this.state.count}</h1>
-          <button onClick={this.add}>Add</button>
-          <button onClick={this.minus}>Minus</button>
-        </div>
-      );
- }
+class App extends React.Component {
+    state = {
+        isLoading:true,
+        movies: []
+    };
+    
+    //api를 받아오는데 시간이 걸린다는 것을 알리는 async await "너는 이걸 기다려야해라는 말"을 하는 것과 같다.
+    //axios가 끝날때 까지 기다렸다가 계속한다.
+    getMovies = async () => {
+        //const movies = await axios.get("https://yts-proxy.now.sh/list_movies.json?sort_by=rating");
+        //console.log(movies.data.data.movies);
+        const {
+            data: {
+                data: {movies}
+            }
+        } = await axios.get("https://yts-proxy.now.sh/list_movies.json?sort_by=rating");
+        //this.setState({movies : movies});
+        this.setState({ movies, isLoading:false });
+    }
+    componentDidMount(){
+        this.getMovies();
+    }
+    render(){
+        const {isLoading, movies} = this.state;
+        return <div>{isLoading? "Loading...":movies.map(movie => {
+            //map에는 무조건 return이 필요하다.
+            return <Movie id={movie.id} year={movie.year} title={movie.title} summary={movie.summary} poster={movie.medium_cover_image}/> 
+        })}</div>
+    }
 }
 
 export default App;
